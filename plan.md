@@ -1,6 +1,6 @@
 Plan: To Do API with FastAPI, PostgreSQL, SQLAlchemy
 
-TL;DR: Build a simple To Do API with full CRUD for Users and To Dos using uv for project management. Each user has many To Dos. Includes comprehensive pytest unit tests for models, schemas, and all API endpoints. Tests use a separate test database to keep data isolated.
+TL;DR: Build a simple To Do API with full CRUD for Users and To Dos using uv for project management. Each user has many To Dos. Uses a layered architecture (controller → service → model) with per-entity files for clean scalability. Includes comprehensive pytest unit tests for models, schemas, and all API endpoints. Tests use a separate test database to keep data isolated.
 
 Steps
 
@@ -22,43 +22,58 @@ Phase 2: Database Configuration — depends on Phase 1
 
 7. Create app/database.py — SQLAlchemy engine, SessionLocal, declarative Base
 
-Phase 3: Models & Schemas — depends on Phase 2
+Phase 3: Models & Schemas (per-entity packages) — depends on Phase 2
 
-8. Create app/models.py — User and Todo ORM models with relationships
+8. Create app/models/ (package) — one file per entity
+   - app/models/__init__.py — empty (no re-exports, import directly from submodules)
+   - app/models/user.py — User ORM model
+   - app/models/todo.py — Todo ORM model with FK to User
 
-9. Create app/schemas.py — Pydantic models (UserBase, UserCreate, UserResponse, etc.)
+9. Create app/schemas/ (package) — one file per entity
+   - app/schemas/__init__.py — empty
+   - app/schemas/user.py — Pydantic models (UserBase, UserCreate, UserResponse, UserList)
+   - app/schemas/todo.py — Pydantic models (TodoBase, TodoCreate, TodoUpdate, TodoResponse, TodoList)
 
-Phase 4: API Routes — depends on Phase 3
+Phase 4: Service Layer (business logic) — depends on Phase 3
 
-10. Create app/routes/users.py — User CRUD endpoints (POST, GET all, GET one, PUT, DELETE)
+10. Create app/services/ (package)
+    - app/services/__init__.py — empty
+    - app/services/user_service.py — create_user, get_users, get_user_by_id, update_user, delete_user
+    - app/services/todo_service.py — create_todo, get_todos, get_todo_by_id, update_todo, delete_todo
 
-11. Create app/routes/todos.py — Todo CRUD endpoints (POST, GET all, GET one, PUT, DELETE)
+Phase 5: API Routes (thin controllers) — depends on Phase 4
 
-Phase 5: Application Entry Point — depends on Phase 4
+11. Create app/routes/users.py — thin endpoints that delegate to user_service
+    (POST, GET all, GET one, PUT, DELETE)
 
-12. Create app/main.py — FastAPI app setup, register routers, auto-create tables on startup
+12. Create app/routes/todos.py — thin endpoints that delegate to todo_service
+    (POST, GET all, GET one, PUT, DELETE)
 
-Phase 6: Testing Infrastructure — depends on Phase 5 (can start in parallel with Phase 4)
+Phase 6: Application Entry Point — depends on Phase 5
 
-13. Create tests/conftest.py — pytest fixtures for test database, TestClient, auto table creation/teardown
+13. Create app/main.py — FastAPI app setup, register routers, auto-create tables on startup
 
-Phase 7: Unit Tests — depends on Phase 6
+Phase 7: Testing Infrastructure — depends on Phase 6 (can start in parallel with Phase 5)
 
-14. Create tests/test\_models.py — test model instantiation, default values, relationships
+14. Create tests/conftest.py — pytest fixtures for test database, TestClient, auto table creation/teardown
 
-15. Create tests/test\_schemas.py — test Pydantic validation
+Phase 8: Unit Tests — depends on Phase 7
 
-16. Create tests/test\_database.py — test DB connection and session
+15. Create tests/test\_models.py — test model instantiation, default values, relationships
 
-17. Create tests/test\_routes/test\_users.py — test all user endpoints (create, read, update, delete)
+16. Create tests/test\_schemas.py — test Pydantic validation
 
-18. Create tests/test\_routes/test\_todos.py — test all todo endpoints (create, read, update, delete)
+17. Create tests/test\_database.py — test DB connection and session
 
-Phase 8: Verification — depends on Phase 7
+18. Create tests/test\_routes/test\_users.py — test all user endpoints (create, read, update, delete)
 
-19. Run uv run pytest to verify all tests pass
+19. Create tests/test\_routes/test\_todos.py — test all todo endpoints (create, read, update, delete)
 
-20. Start server with uv run uvicorn app.main:app --reload and test manually in Swagger UI (/docs)
+Phase 9: Verification — depends on Phase 8
+
+20. Run uv run pytest to verify all tests pass
+
+21. Start server with uv run uvicorn app.main:app --reload and test manually in Swagger UI (/docs)
 
 Relevant files to create
 
@@ -72,15 +87,29 @@ app/main.py — FastAPI app and router registration
 
 app/database.py — SQLAlchemy setup (engine, SessionLocal, Base)
 
-app/models.py — User and Todo SQLAlchemy ORM models
+app/models/__init__.py — empty package marker
 
-app/schemas.py — Pydantic request/response models
+app/models/user.py — User ORM model
+
+app/models/todo.py — Todo ORM model with FK to User
+
+app/schemas/__init__.py — empty package marker
+
+app/schemas/user.py — Pydantic request/response models for User
+
+app/schemas/todo.py — Pydantic request/response models for Todo
+
+app/services/__init__.py — empty package marker
+
+app/services/user_service.py — User business logic
+
+app/services/todo_service.py — Todo business logic
 
 app/config.py — configuration from .env
 
-app/routes/users.py — User CRUD endpoints
+app/routes/users.py — User CRUD endpoints (thin controllers)
 
-app/routes/todos.py — Todo CRUD endpoints
+app/routes/todos.py — Todo CRUD endpoints (thin controllers)
 
 tests/conftest.py — pytest fixtures
 
@@ -123,3 +152,9 @@ No authentication for MVP
 No pagination for MVP
 
 SQLAlchemy ORM for type safety
+
+Layered architecture: routes (thin controllers) → services (business logic) → models/schemas (data layer)
+
+Per-entity files under models/, schemas/, services/ packages for clean separation and scalability
+
+Empty __init__.py files (no re-exports) — import directly from entity files
