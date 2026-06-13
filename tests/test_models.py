@@ -4,7 +4,8 @@ from datetime import datetime, timezone
 import pytest
 from sqlalchemy import select
 
-from app.models import Todo, User
+from app.models.todo import Todo
+from app.models.user import User
 
 
 @pytest.mark.asyncio

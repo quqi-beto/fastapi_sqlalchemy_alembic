@@ -17,7 +17,8 @@ if config.config_file_name is not None:
 # add your model's MetaData object here
 # for 'autogenerate' support
 from app.database import Base
-from app.models import User, Todo  # noqa: F401 - needed for autogenerate
+from app.models.todo import Todo  # noqa: F401 - needed for autogenerate
+from app.models.user import User  # noqa: F401 - needed for autogenerate
 target_metadata = Base.metadata
 
 # other values from the config, defined by the needs of env.py,

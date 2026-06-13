@@ -3,13 +3,8 @@ import uuid
 import pytest
 from pydantic import ValidationError
 
-from app.schemas import (
-    TodoCreate,
-    TodoResponse,
-    TodoUpdate,
-    UserCreate,
-    UserResponse,
-)
+from app.schemas.todo import TodoCreate, TodoResponse, TodoUpdate
+from app.schemas.user import UserCreate, UserResponse
 
 
 class TestUserSchemas:

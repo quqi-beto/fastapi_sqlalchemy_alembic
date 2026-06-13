@@ -5,29 +5,6 @@ from typing import Optional
 from pydantic import BaseModel, ConfigDict
 
 
-# ── User Schemas ──
-class UserBase(BaseModel):
-    username: str
-    email: str
-
-
-class UserCreate(UserBase):
-    pass
-
-
-class UserResponse(UserBase):
-    id: uuid.UUID
-    created_at: datetime
-
-    model_config = ConfigDict(from_attributes=True)
-
-
-class UserList(BaseModel):
-    users: list[UserResponse]
-    total: int
-
-
-# ── Todo Schemas ──
 class TodoBase(BaseModel):
     title: str
     description: Optional[str] = None

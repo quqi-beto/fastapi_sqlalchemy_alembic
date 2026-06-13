@@ -1,6 +1,6 @@
 # FastAPI To Do API — Async SQLAlchemy + Alembic
 
-A production-ready To Do API built with **FastAPI**, **async SQLAlchemy**, and **Alembic** for database migrations. Users can create, update, and delete to-do items, with each user having many to-dos.
+A production-ready To Do API built with **FastAPI**, **async SQLAlchemy**, and **Alembic** for database migrations. Uses a **controller-service-model** layered architecture with per-entity files for clean scalability. Users can create, update, and delete to-do items, with each user having many to-dos.
 
 ## Tech Stack
 
@@ -17,6 +17,8 @@ A production-ready To Do API built with **FastAPI**, **async SQLAlchemy**, and *
 ## Features
 
 - Full CRUD for **Users** and **Todos**
+- **Layered architecture**: routes (controllers) → services (business logic) → models (data)
+- **Per-entity files**: models, schemas, and services each get their own file — scales cleanly as new entities are added
 - One-to-many relationship: each user has many todos
 - Cascade delete: deleting a user removes all their todos
 - Auto-set `date_completed` when a todo is marked done
@@ -34,6 +36,18 @@ A production-ready To Do API built with **FastAPI**, **async SQLAlchemy**, and *
 │   ├── env.py
 │   └── script.py.mako
 ├── app/
+│   ├── models/
+│   │   ├── __init__.py
+│   │   ├── user.py
+│   │   └── todo.py
+│   ├── schemas/
+│   │   ├── __init__.py
+│   │   ├── user.py
+│   │   └── todo.py
+│   ├── services/
+│   │   ├── __init__.py
+│   │   ├── user_service.py
+│   │   └── todo_service.py
 │   ├── routes/
 │   │   ├── __init__.py
 │   │   ├── todos.py
@@ -41,9 +55,7 @@ A production-ready To Do API built with **FastAPI**, **async SQLAlchemy**, and *
 │   ├── __init__.py
 │   ├── config.py
 │   ├── database.py
-│   ├── main.py
-│   ├── models.py
-│   └── schemas.py
+│   └── main.py
 ├── tests/
 │   ├── test_routes/
 │   │   ├── __init__.py
